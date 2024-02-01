@@ -1,0 +1,11 @@
+openai
+langchain
+langchain-community
+langchainhub
+langchain-openai
+pandas
+requests
+pyarrow
+astrapy
+tiktoken
+python-dotenv
