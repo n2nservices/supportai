@@ -82,7 +82,7 @@ for task in tasks:
 
 # Convert to CSV
     
-csv_file_path = 'temp_tasks_details.csv'
+csv_file_path = './temp_tasks_details.csv'
 
 if os.path.exists(csv_file_path):
     # Delete the file
@@ -125,7 +125,7 @@ df.to_csv(csv_file_path, index=False, encoding='utf-8')
 
 # Load, Split, and save data to DB
 
-loader = CSVLoader(file_path='./temp_tasks_details.csv')
+loader = CSVLoader(file_path=csv_file_path)
 data = loader.load()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)

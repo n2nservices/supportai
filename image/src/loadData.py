@@ -122,6 +122,7 @@ def handler(event, context):
     flattened_tasks = [flatten_task(task) for task in tasks]
     df = pd.DataFrame(flattened_tasks)
     df.to_csv(csv_file_path, index=False, encoding='utf-8')
+    print(f"{csv_file_path} was successfully created.")
 
 
     # Load, Split, and save data to DB
