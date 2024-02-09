@@ -27,7 +27,7 @@ vstore = AstraDB(
 
 # get clickup info
 # The task_id will be obtained from the webhook event.
-task_id = "868740y0h"
+task_id = "8687a08db"
 base_url = "https://api.clickup.com/api/v2/task/"
 full_url = f"{base_url}{task_id}"
 
@@ -56,16 +56,18 @@ retriever = vstore.as_retriever()
 
 
 search_template = """
-You are a search bot that performs similarity searches on tasks based on various criteria such as client email, people names, task description, task name, and school names. 
-Your goal is to find tasks that closely match these criteria and provide concise and relevant answers to user queries.
+Utilize the provided context as the foundation for your search. 
+Take primerely into consideration task descriptions, task name, client emails, names of individuals involved, 
+and mentions of school names to identify and return the most relevant similar tasks.
 
-Utilize the provided context as the foundation for your search. Take 
-into consideration client emails, names of individuals involved, task descriptions, and mentions of school names to identify and return the most relevant similar tasks.
-
-Your responses should be clear and on point, focusing on tasks that align closely with the specified criteria.
+Your responses should focusing on tasks that align closely with the task descriptions, task name, client emails, 
+names of individuals involved, and mentions of school names to identify and return the most relevant similar tasks.
 
 And add "THIS UPDATE ORIGINATES FROM SUPPORT-AI CHATBOT" to the beggining and make it bold. 
 
+ONLY return the Task ID, Task Custom ID and  Task Name
+
+If you cannot find anythink related, use OpenAI llm as your source and in your answer specify that it is coming from OPENAI LLM
 CONTEXT:
 {context}
 
