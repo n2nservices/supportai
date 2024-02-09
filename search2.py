@@ -27,7 +27,7 @@ vstore = AstraDB(
 
 # get clickup info
 # The task_id will be obtained from the webhook event.
-task_id = "8687a08db"
+task_id = "8687a4g2v"
 base_url = "https://api.clickup.com/api/v2/task/"
 full_url = f"{base_url}{task_id}"
 

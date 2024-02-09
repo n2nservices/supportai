@@ -13,7 +13,7 @@ load_dotenv()
 def lambda_handler(event, context):
 
     # The task_id will be obtained from the webhook event.
-    task_id = "8687a08db"
+    task_id = "8687a4g2v"
 
     # body = json.loads(event['body'])
     # task_id = body['task_id']
@@ -92,7 +92,7 @@ def lambda_handler(event, context):
     # similarity_threshold = 0.7
 
     # Perform the similarity search with the threshold
-    results = vstore.max_marginal_relevance_search(query, k=4)
+    results = vstore.similarity_search(query, k=4)
     print(results)
 
     concatenated_contents = ""

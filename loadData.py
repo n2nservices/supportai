@@ -14,10 +14,10 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 
 # Load, chunk and index the contents of the blog.
-loader = CSVLoader(file_path='supportai-qa.csv', encoding='utf-8')
+loader = CSVLoader(file_path='./supportai-qa.csv', encoding='utf-8')
 docs = loader.load()
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
 splits = text_splitter.split_documents(docs)
 
 
@@ -32,4 +32,3 @@ vstore = AstraDB(
 
 # vstore.delete_collection()
 supportTickets = vstore.add_documents(splits)
-
