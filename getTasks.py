@@ -1,13 +1,13 @@
 import os
 from dotenv import load_dotenv
-import requests
-import json
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import AstraDB
 from langchain_community.document_loaders.csv_loader import CSVLoader
 from datetime import datetime, timedelta
 import pandas as pd
+import aiohttp
+import asyncio
 
 load_dotenv()
 
@@ -17,6 +17,14 @@ ASTRA_DB_API_ENDPOINT = os.environ.get("ASTRA_DB_ENDPOINT")
 ASTRA_DB_COLLECTION = os.environ.get("ASTRA_DB_COLLECTION")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
+# PROD environment
+# ASTRA_DB_PROD_KEYSPACE = os.environ.get("ASTRA_DB_PROD_KEYSPACE")
+# ASTRA_DB_PROD_CLICKUP_COLLECTION = os.environ.get("ASTRA_DB_PROD_CLICKUP_COLLECTION")
+
+# DEV Environenet
+ASTRA_DB_DEV_KEYSPACE = os.environ.get("ASTRA_DB_DEV_KEYSPACE")
+ASTRA_DB_DEV_CLICKUP_COLLECTION = os.environ.get("ASTRA_DB_DEV_CLICKUP_COLLECTION")
+
 # QA and PROD clickup Env Support Ids
 env_list_ids = [134110690, 181779213]
 
@@ -25,60 +33,64 @@ headers = {
     'Content-Type': 'application/json'
 }
 
-# Calculate last 7 days in milliseconds
+# Calculate last 2 days in milliseconds
 today = datetime.now()
 two_days_ago = today - timedelta(days=2)
 two_days_ago_time_ms = int(two_days_ago.timestamp() * 1000)
 
 
-def get_tasks(list_id):
+async def get_tasks(session, list_id):
     tasks = []
-    pageNumber=0
+    pageNumber = 0
     nextPage = True
 
     while nextPage:
         url = f"https://api.clickup.com/api/v2/list/{list_id}/task?page={pageNumber}&date_created_gt={two_days_ago_time_ms}&include_closed=true"
         
-        response = requests.get(url, headers=headers)
-        lastPage = response.json()['last_page']
-       
-
-        if response.status_code == 200:
-            data = response.json()
-            tasks.extend(data['tasks'])
-
-            # Handle pagination
-            if lastPage == False:
-                nextPage = True 
-                pageNumber = pageNumber+1
-            else: 
-                nextPage = False
-        else:
-            print(f"Failed to fetch tasks: {response.status_code}")
-            break
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                tasks.extend(data['tasks'])
+                nextPage = not data['last_page']
+                pageNumber += 1
+            else:
+                print(f"Failed to fetch tasks: {response.status}")
+                break
     return tasks
 
 
-def get_comments(task_id):
+async def get_comments(session, task_id):
     comments = []
-    
     url = f"https://api.clickup.com/api/v2/task/{task_id}/comment"
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        data = response.json()
-        comments.extend(data['comments'])
-    else:
-        print(f"Failed to fetch comments for task {task_id}: {response.status_code}")
+    async with session.get(url) as response:
+        if response.status == 200:
+            data = await response.json()
+            comments.extend(data['comments'])
+        else:
+            print(f"Failed to fetch comments for task {task_id}: {response.status}")
     return comments
 
-tasks = []
-for list_id in env_list_ids: 
-    tasks.extend(get_tasks(list_id))
 
+async def fetch_all_tasks_and_comments():
+    async with aiohttp.ClientSession(headers=headers) as session:
+        tasks = []
+        for list_id in env_list_ids:
+            tasks.extend(await get_tasks(session, list_id))
 
-for task in tasks:
-    task['comments'] = get_comments(task['id'])
+        comments_tasks = []
+        for task in tasks:
+            comments_task = asyncio.create_task(get_comments(session, task['id']))
+            comments_tasks.append(comments_task)
+
+        comments = await asyncio.gather(*comments_tasks)
+        for task, task_comments in zip(tasks, comments):
+            task['comments'] = task_comments
+
+        return tasks
+
+# Running the main async function
+if __name__ == "__main__":
+    tasks = asyncio.run(fetch_all_tasks_and_comments())
 
 # Convert to CSV
     
@@ -99,18 +111,8 @@ def flatten_task(task):
         "Custom ID": task.get('custom_id'),
         "Name": task.get('name'),
         "Status": task['status']['status'] if 'status' in task else '',
-        "Priority": task.get('priority'),
-        "Date Created": task.get('date_created'),
-        "Date Updated": task.get('date_updated'),
-        "Creator": task['creator']['username'] if 'creator' in task else '',
-        "Assignees": ", ".join([assignee['username'] for assignee in task.get('assignees', [])]),
-        "Watchers": ", ".join([watcher['username'] for watcher in task.get('watchers', [])]),
         "Description": task.get('description'),
     }
-
-    # Flatten custom fields
-    for field in task.get('custom_fields', []):
-        task_details[field['name']] = field.get('value')
 
     # Flatten comments
     comments = " | ".join([comment['comment_text'] for comment in task.get('comments', [])])
@@ -125,7 +127,7 @@ df.to_csv(csv_file_path, index=False, encoding='utf-8')
 
 # Load, Split, and save data to DB
 
-loader = CSVLoader(file_path=csv_file_path)
+loader = CSVLoader(file_path=csv_file_path, encoding='utf-8')
 data = loader.load()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -135,7 +137,8 @@ embedding = OpenAIEmbeddings()
 
 vstore = AstraDB(
     embedding=embedding,
-    collection_name=ASTRA_DB_COLLECTION,
+    namespace=ASTRA_DB_DEV_KEYSPACE,
+    collection_name=ASTRA_DB_DEV_CLICKUP_COLLECTION,
     token=ASTRA_DB_APPLICATION_TOKEN,
     api_endpoint=ASTRA_DB_API_ENDPOINT,
 )

@@ -5,3 +5,4 @@ langchain-openai==0.0.2.post1
 langchainhub==0.1.14
 openai==1.7.2
 astrapy==0.7.0
+aiohttp

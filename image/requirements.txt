@@ -9,3 +9,4 @@ pyarrow
 astrapy
 tiktoken
 python-dotenv
+aiohttp
