@@ -17,8 +17,8 @@ ASTRA_DB_API_ENDPOINT = os.environ.get("ASTRA_DB_ENDPOINT")
 ASTRA_DB_COLLECTION = os.environ.get("ASTRA_DB_COLLECTION")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
-# QA and PROD clickup Env Support Ids
-env_list_ids = [134110690, 181779213]
+# QA and PROD clickup Env Support Ids - 181779213
+env_list_ids = [134110690]
 
 headers = {
     'Authorization': CLICKUP_KEY,
@@ -99,18 +99,8 @@ def flatten_task(task):
         "Custom ID": task.get('custom_id'),
         "Name": task.get('name'),
         "Status": task['status']['status'] if 'status' in task else '',
-        "Priority": task.get('priority'),
-        "Date Created": task.get('date_created'),
-        "Date Updated": task.get('date_updated'),
-        "Creator": task['creator']['username'] if 'creator' in task else '',
-        "Assignees": ", ".join([assignee['username'] for assignee in task.get('assignees', [])]),
-        "Watchers": ", ".join([watcher['username'] for watcher in task.get('watchers', [])]),
         "Description": task.get('description'),
     }
-
-    # Flatten custom fields
-    for field in task.get('custom_fields', []):
-        task_details[field['name']] = field.get('value')
 
     # Flatten comments
     comments = " | ".join([comment['comment_text'] for comment in task.get('comments', [])])
