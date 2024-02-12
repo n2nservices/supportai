@@ -27,7 +27,7 @@ vstore = AstraDB(
 
 # get clickup info
 # The task_id will be obtained from the webhook event.
-task_id = "8687a4g2v"
+task_id = "8687a51eq"
 base_url = "https://api.clickup.com/api/v2/task/"
 full_url = f"{base_url}{task_id}"
 
@@ -56,18 +56,12 @@ retriever = vstore.as_retriever()
 
 
 search_template = """
-Utilize the provided context as the foundation for your search. 
-Take primerely into consideration task descriptions, task name, client emails, names of individuals involved, 
-and mentions of school names to identify and return the most relevant similar tasks.
+Add "THIS UPDATE ORIGINATES FROM SUPPORT-AI CHATBOT" to the beggining and make it bold. 
 
-Your responses should focusing on tasks that align closely with the task descriptions, task name, client emails, 
-names of individuals involved, and mentions of school names to identify and return the most relevant similar tasks.
+Return the Task ID, Task Custom ID and  Task Name of the top 4 tickets that are the most similar to the TASK_INPUT.
 
-And add "THIS UPDATE ORIGINATES FROM SUPPORT-AI CHATBOT" to the beggining and make it bold. 
+Also based on the context and comments provide a potential Root Cause Analysis.
 
-ONLY return the Task ID, Task Custom ID and  Task Name
-
-If you cannot find anythink related, use OpenAI llm as your source and in your answer specify that it is coming from OPENAI LLM
 CONTEXT:
 {context}
 
