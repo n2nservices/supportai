@@ -18,12 +18,12 @@ ASTRA_DB_COLLECTION = os.environ.get("ASTRA_DB_COLLECTION")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 # PROD environment
-# ASTRA_DB_PROD_KEYSPACE = os.environ.get("ASTRA_DB_PROD_KEYSPACE")
-# ASTRA_DB_PROD_CLICKUP_COLLECTION = os.environ.get("ASTRA_DB_PROD_CLICKUP_COLLECTION")
+ASTRA_DB_PROD_KEYSPACE = os.environ.get("ASTRA_DB_PROD_KEYSPACE")
+ASTRA_DB_PROD_CLICKUP_COLLECTION = os.environ.get("ASTRA_DB_PROD_CLICKUP_COLLECTION")
 
 # DEV Environenet
-ASTRA_DB_DEV_KEYSPACE = os.environ.get("ASTRA_DB_DEV_KEYSPACE")
-ASTRA_DB_DEV_CLICKUP_COLLECTION = os.environ.get("ASTRA_DB_DEV_CLICKUP_COLLECTION")
+# ASTRA_DB_DEV_KEYSPACE = os.environ.get("ASTRA_DB_DEV_KEYSPACE")
+# ASTRA_DB_DEV_CLICKUP_COLLECTION = os.environ.get("ASTRA_DB_DEV_CLICKUP_COLLECTION")
 
 # QA and PROD clickup Env Support Ids
 env_list_ids = [134110690, 181779213]
@@ -137,8 +137,8 @@ embedding = OpenAIEmbeddings()
 
 vstore = AstraDB(
     embedding=embedding,
-    namespace=ASTRA_DB_DEV_KEYSPACE,
-    collection_name=ASTRA_DB_DEV_CLICKUP_COLLECTION,
+    namespace=ASTRA_DB_PROD_KEYSPACE,
+    collection_name=ASTRA_DB_PROD_CLICKUP_COLLECTION,
     token=ASTRA_DB_APPLICATION_TOKEN,
     api_endpoint=ASTRA_DB_API_ENDPOINT,
 )

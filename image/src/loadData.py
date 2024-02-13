@@ -35,7 +35,7 @@ def handler(event, context):
     'Content-Type': 'application/json'
     }
 
-    # Calculate last 7 days in milliseconds
+    # Calculate last 2 days in milliseconds
     today = datetime.now()
     two_days_ago = today - timedelta(days=2)
     two_days_ago_time_ms = int(two_days_ago.timestamp() * 1000)
@@ -90,8 +90,8 @@ def handler(event, context):
             return tasks
 
     # Running the main async function
-    if __name__ == "__main__":
-        tasks = asyncio.run(fetch_all_tasks_and_comments())
+    
+    tasks = asyncio.run(fetch_all_tasks_and_comments())
 
     # Convert response to CSV
     csv_file_path = '/tmp/temp_tasks_details.csv'
@@ -144,6 +144,6 @@ def handler(event, context):
     )
 
     # vstore.delete_collection()
-    supportTickets = vstore.add_documents(splits)
+    supportTickets = vstore.add_documents(splits)    
 
-
+# handler("", "")

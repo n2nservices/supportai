@@ -9,15 +9,22 @@ load_dotenv()
 
 ASTRA_DB_APPLICATION_TOKEN = os.environ.get("ASTRA_DB_APPLICATION_TOKEN")
 ASTRA_DB_API_ENDPOINT = os.environ.get("ASTRA_DB_ENDPOINT")
-ASTRA_DB_COLLECTION = os.environ.get("ASTRA_DB_COLLECTION")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+# PROD environment
+ASTRA_DB_PROD_KEYSPACE = os.environ.get("ASTRA_DB_PROD_KEYSPACE")
+ASTRA_DB_PROD_CLICKUP_COLLECTION = os.environ.get("ASTRA_DB_PROD_CLICKUP_COLLECTION")
+
+# DEV Environenet
+# ASTRA_DB_DEV_KEYSPACE = os.environ.get("ASTRA_DB_DEV_KEYSPACE")
+# ASTRA_DB_DEV_CLICKUP_COLLECTION = os.environ.get("ASTRA_DB_DEV_CLICKUP_COLLECTION")
 
 
 # Load, chunk and index the contents of the blog.
-loader = CSVLoader(file_path='./supportai-qa.csv', encoding='utf-8')
+loader = CSVLoader(file_path='./supportai-prod.csv', encoding='utf-8')
 docs = loader.load()
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 splits = text_splitter.split_documents(docs)
 
 
@@ -25,7 +32,8 @@ embedding = OpenAIEmbeddings()
 
 vstore = AstraDB(
     embedding=embedding,
-    collection_name=ASTRA_DB_COLLECTION,
+    namespace=ASTRA_DB_PROD_KEYSPACE,
+    collection_name=ASTRA_DB_PROD_CLICKUP_COLLECTION,
     token=ASTRA_DB_APPLICATION_TOKEN,
     api_endpoint=ASTRA_DB_API_ENDPOINT,
 )
